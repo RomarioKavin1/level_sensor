@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {ScrollView, StyleSheet, View, Text} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Card,
   Paragraph,
@@ -9,15 +10,16 @@ import {
 } from 'react-native-paper';
 
 const ThingSpeakDataDisplay = () => {
-  const [sensorData, setSensorData] = useState();
-  const [connectionStatus, setStatus] = useState();
+  const [sensorData, setSensorData] = useState(0);
+  const [connectionStatus, setStatus] = useState('');
   const [maxLevel, setMaxLevel] = useState('');
   const [minLevel, setMinLevel] = useState('');
-  const [height, setheight] = useState('');
+  const [height, setHeight] = useState('');
 
   const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
+    loadData();
     fetchData();
     fetchConnection();
     const interval = setInterval(() => {
@@ -44,6 +46,44 @@ const ThingSpeakDataDisplay = () => {
     }
   }, [sensorData, maxLevel, minLevel]);
 
+  const loadData = async () => {
+    try {
+      const storedHeight = await AsyncStorage.getItem('height');
+      const storedMaxLevel = await AsyncStorage.getItem('maxLevel');
+      const storedMinLevel = await AsyncStorage.getItem('minLevel');
+
+      if (storedHeight !== null) setHeight(storedHeight);
+      if (storedMaxLevel !== null) setMaxLevel(storedMaxLevel);
+      if (storedMinLevel !== null) setMinLevel(storedMinLevel);
+    } catch (error) {
+      console.error('Failed to load data from local storage:', error);
+    }
+  };
+
+  const saveData = async () => {
+    try {
+      await AsyncStorage.setItem('height', height);
+      await AsyncStorage.setItem('maxLevel', maxLevel);
+      await AsyncStorage.setItem('minLevel', minLevel);
+    } catch (error) {
+      console.error('Failed to save data to local storage:', error);
+    }
+  };
+
+  const resetData = async () => {
+    setHeight('');
+    setMaxLevel('');
+    setMinLevel('');
+
+    try {
+      await AsyncStorage.removeItem('height');
+      await AsyncStorage.removeItem('maxLevel');
+      await AsyncStorage.removeItem('minLevel');
+    } catch (error) {
+      console.error('Failed to reset data in local storage:', error);
+    }
+  };
+
   const fetchData = async () => {
     const url = `https://level-sensor-1663d-default-rtdb.asia-southeast1.firebasedatabase.app/readings.json`;
     try {
@@ -66,6 +106,8 @@ const ThingSpeakDataDisplay = () => {
     }
   };
 
+  const calculatedReading = height ? height - sensorData : 'N/A';
+
   return (
     <PaperProvider>
       <ScrollView style={styles.container}>
@@ -75,17 +117,17 @@ const ThingSpeakDataDisplay = () => {
               Battery Percentage: {connectionStatus || 'N/A'}
             </Paragraph>
             <Paragraph style={styles.txt}>
-              Readings: {sensorData || 'N/A'}
+              Readings: {calculatedReading}
             </Paragraph>
             <Card key={5} style={styles.card2}>
               <TextInput
                 label="Height"
                 value={height}
-                onChangeText={setheight}
+                onChangeText={setHeight}
                 keyboardType="numeric"
               />
-              <Button>save</Button>
-              <Button>Reset</Button>
+              <Button onPress={saveData}>Save</Button>
+              <Button onPress={resetData}>Reset</Button>
             </Card>
             <Card key={2} style={styles.card2}>
               <TextInput
@@ -94,8 +136,8 @@ const ThingSpeakDataDisplay = () => {
                 onChangeText={setMaxLevel}
                 keyboardType="numeric"
               />
-              <Button>save</Button>
-              <Button>Reset</Button>
+              <Button onPress={saveData}>Save</Button>
+              <Button onPress={resetData}>Reset</Button>
             </Card>
             <Card key={3} style={styles.card2}>
               <TextInput
@@ -104,8 +146,8 @@ const ThingSpeakDataDisplay = () => {
                 onChangeText={setMinLevel}
                 keyboardType="numeric"
               />
-              <Button>save</Button>
-              <Button>Reset</Button>
+              <Button onPress={saveData}>Save</Button>
+              <Button onPress={resetData}>Reset</Button>
             </Card>
 
             {alertMessage ? (
