@@ -13,6 +13,8 @@ const ThingSpeakDataDisplay = () => {
   const [connectionStatus, setStatus] = useState();
   const [maxLevel, setMaxLevel] = useState('');
   const [minLevel, setMinLevel] = useState('');
+  const [height, setheight] = useState('');
+
   const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
@@ -75,6 +77,16 @@ const ThingSpeakDataDisplay = () => {
             <Paragraph style={styles.txt}>
               Readings: {sensorData || 'N/A'}
             </Paragraph>
+            <Card key={5} style={styles.card2}>
+              <TextInput
+                label="Height"
+                value={height}
+                onChangeText={setheight}
+                keyboardType="numeric"
+              />
+              <Button>save</Button>
+              <Button>Reset</Button>
+            </Card>
             <Card key={2} style={styles.card2}>
               <TextInput
                 label="Max Level"
@@ -83,6 +95,7 @@ const ThingSpeakDataDisplay = () => {
                 keyboardType="numeric"
               />
               <Button>save</Button>
+              <Button>Reset</Button>
             </Card>
             <Card key={3} style={styles.card2}>
               <TextInput
@@ -92,6 +105,7 @@ const ThingSpeakDataDisplay = () => {
                 keyboardType="numeric"
               />
               <Button>save</Button>
+              <Button>Reset</Button>
             </Card>
 
             {alertMessage ? (

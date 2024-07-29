@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "emulator": "emulator -avd Pixel_5_API_32",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
